@@ -14,22 +14,19 @@ namespace RazorPages.Samples.Web
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvcCore();
+            services.AddMvcCore().AddRazorPages();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
+            loggerFactory.AddConsole(LogLevel.Debug);
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.Run(async (context) =>
-            {
-                await context.Response.WriteAsync("Hello World!");
-            });
+            app.UseMvc();
         }
     }
 }
