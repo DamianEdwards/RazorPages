@@ -3,8 +3,52 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{53F409E0-79B3-4A31-8FF2-91AA2ACF2A8F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{37CCA5C8-D7E2-4628-8301-ACC3CF4F17C3}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "RazorPages.Samples.Web", "samples\RazorPages.Samples.Web\RazorPages.Samples.Web.xproj", "{FDAAD24D-4E51-45E7-BAF8-312B80596330}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AF46F2C6-AA7B-444F-B60F-1F9B23D4DC57}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+		NuGet.Config = NuGet.Config
+	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Mvc.Core", "..\Mvc\src\Microsoft.AspNetCore.Mvc.Core\Microsoft.AspNetCore.Mvc.Core.xproj", "{C48DA9D7-ACB5-4408-AA79-27ECB60A67EF}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Mvc.Abstractions", "..\Mvc\src\Microsoft.AspNetCore.Mvc.Abstractions\Microsoft.AspNetCore.Mvc.Abstractions.xproj", "{1154203C-7579-4525-906E-BC55268421C1}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Microsoft.AspNetCore.Mvc.RazorPages", "src\Microsoft.AspNetCore.Mvc.RazorPages\Microsoft.AspNetCore.Mvc.RazorPages.xproj", "{92A3ED9A-4260-42A1-B405-CC21B963DE12}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FDAAD24D-4E51-45E7-BAF8-312B80596330}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDAAD24D-4E51-45E7-BAF8-312B80596330}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDAAD24D-4E51-45E7-BAF8-312B80596330}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDAAD24D-4E51-45E7-BAF8-312B80596330}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C48DA9D7-ACB5-4408-AA79-27ECB60A67EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C48DA9D7-ACB5-4408-AA79-27ECB60A67EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C48DA9D7-ACB5-4408-AA79-27ECB60A67EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C48DA9D7-ACB5-4408-AA79-27ECB60A67EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1154203C-7579-4525-906E-BC55268421C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1154203C-7579-4525-906E-BC55268421C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1154203C-7579-4525-906E-BC55268421C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1154203C-7579-4525-906E-BC55268421C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92A3ED9A-4260-42A1-B405-CC21B963DE12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92A3ED9A-4260-42A1-B405-CC21B963DE12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92A3ED9A-4260-42A1-B405-CC21B963DE12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92A3ED9A-4260-42A1-B405-CC21B963DE12}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FDAAD24D-4E51-45E7-BAF8-312B80596330} = {37CCA5C8-D7E2-4628-8301-ACC3CF4F17C3}
+		{92A3ED9A-4260-42A1-B405-CC21B963DE12} = {53F409E0-79B3-4A31-8FF2-91AA2ACF2A8F}
 	EndGlobalSection
 EndGlobal
