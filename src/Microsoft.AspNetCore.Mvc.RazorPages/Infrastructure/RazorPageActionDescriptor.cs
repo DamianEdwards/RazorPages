@@ -4,6 +4,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 {
     public class RazorPageActionDescriptor : ActionDescriptor
     {
-        public string Path { get; set; }
+        public string RelativePath { get; set; }
+
+        public string ViewEnginePath { get; set; }
     }
 }
