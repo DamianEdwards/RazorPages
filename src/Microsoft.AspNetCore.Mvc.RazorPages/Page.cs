@@ -4,6 +4,7 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Razor.Runtime.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
@@ -13,7 +14,22 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
     {
         public HttpContext HttpContext { get; set; }
 
-        public abstract Task ExecuteAsync();
+        public virtual async Task ExecuteAsync()
+        {
+            await OnLoadAsync();
+
+            await RenderAsync();
+        }
+
+        public virtual Task OnLoadAsync()
+        {
+            return TaskCache.CompletedTask;
+        }
+
+        public virtual Task RenderAsync()
+        {
+            return TaskCache.CompletedTask;
+        }
 
         protected TTagHelper CreateTagHelper<TTagHelper>() where TTagHelper : ITagHelper, new()
         {
