@@ -1,7 +1,10 @@
-﻿<html>
+﻿@using System.Reflection
+<html>
     <head>
     </head>
     <body>
         <h1>Hello, world!</h1>
+        <div>My class: @GetType().GetTypeInfo().FullName</div>
+        <div>Base class: @GetType().GetTypeInfo().BaseType.FullName</div>
     </body>
 </html>

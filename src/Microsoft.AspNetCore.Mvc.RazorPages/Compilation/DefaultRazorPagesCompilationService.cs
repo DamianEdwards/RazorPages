@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.AspNetCore.Mvc.RazorPages.Compilation.Rewriters;
 using Microsoft.AspNetCore.Razor;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,21 +20,32 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
         private readonly RazorPagesRazorEngineHost _host;
         private readonly ApplicationPartManager _partManager;
 
+        private readonly string _baseNamespace;
+
         public DefaultRazorPagesCompilationService(
             ApplicationPartManager partManager,
             RazorPagesRazorEngineHost host)
         {
             _partManager = partManager;
             _host = host;
+
+            // For now let's assume the first part is the "app" assembly, and the assembly name is the "base"
+            // namespace.
+            _baseNamespace = _partManager.ApplicationParts.Cast<AssemblyPart>().First().Assembly.GetName().Name;
         }
 
         public Type Compile(Stream stream, string relativePath)
         {
             var engine = new RazorTemplateEngine(_host);
+
+            var baseClass = Path.GetFileNameWithoutExtension(Path.GetFileName(relativePath));
+            var @class = "Generated_" + baseClass;
+            var @namespace = GetNamespace(relativePath);
+
             var generatorResults = engine.GenerateCode(
                 stream,
-                Path.GetFileNameWithoutExtension(Path.GetFileName(relativePath)),
-                "RazorPages",
+                @class,
+                @namespace,
                 relativePath);
 
             if (!generatorResults.Success)
@@ -43,11 +55,20 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             }
 
             var tree = CSharpSyntaxTree.ParseText(SourceText.From(generatorResults.GeneratedCode, Encoding.UTF8));
+
             var compilation = CSharpCompilation.Create(
                 assemblyName: Path.GetRandomFileName(),
                 syntaxTrees: new SyntaxTree[] { tree },
                 references: GetCompilationReferences(),
                 options: new CSharpCompilationOptions(outputKind: OutputKind.DynamicallyLinkedLibrary));
+
+            if (compilation.GetTypeByMetadataName(@namespace + "." + baseClass) != null)
+            {
+                // base class exists, use it.
+                var original = tree;
+                tree = CSharpSyntaxTree.Create((CSharpSyntaxNode)new BaseClassRewriter(@class, @namespace + "." + baseClass).Visit(tree.GetRoot()));
+                compilation = compilation.ReplaceSyntaxTree(original, tree);
+            }
 
             using (var pe = new MemoryStream())
             {
@@ -58,7 +79,6 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                     {
                         Throw(stream, relativePath, generatorResults.GeneratedCode, compilation.AssemblyName, emitResult.Diagnostics);
                     }
-
 
                     pe.Seek(0, SeekOrigin.Begin);
                     pdb.Seek(0, SeekOrigin.Begin);
@@ -199,6 +219,19 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
 #else
             return System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromStream(assemblyStream, pdbStream);
 #endif
+        }
+
+        private string GetNamespace(string relativePath)
+        {
+            var @namespace = new StringBuilder(_baseNamespace);
+            var parts = Path.GetDirectoryName(relativePath).Split('/');
+            foreach (var part in parts)
+            {
+                @namespace.Append(".");
+                @namespace.Append(part);
+            }
+
+            return @namespace.ToString();
         }
     }
 }
