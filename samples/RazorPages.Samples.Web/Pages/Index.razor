@@ -1,10 +1,23 @@
 ﻿@using System.Reflection
+
+@functions {
+    public string Message { get; set; }
+}
+
+@{
+    Message = HttpContext.Request.Query["message"];
+    if (string.IsNullOrEmpty(Message))
+    {
+        Message = "Hello, World!";
+    }
+}
 <html>
     <head>
     </head>
     <body>
-        <h1>Hello, world!</h1>
-        <div>My class: @GetType().GetTypeInfo().FullName</div>
-        <div>Base class: @GetType().GetTypeInfo().BaseType.FullName</div>
+        <h1>Message from cshtml: @Message</h1>
+        <h1>Message from codebehind: @Message2</h1>
+        <h1>My class: @GetType().GetTypeInfo().FullName</h1>
+        <h1>Base class: @GetType().GetTypeInfo().BaseType.FullName</h1>
     </body>
 </html>

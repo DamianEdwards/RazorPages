@@ -8,14 +8,14 @@ namespace RazorPages.Samples.Web.Pages
 {
     public class Index : Page
     {
-        public string Message { get; set; } = "Hello, world!";
+        public string Message2 { get; set; } = "Hello, world!";
 
         public override Task OnLoadAsync()
         {
-            var message = HttpContext.Request.Query["message"];
-            if (!string.IsNullOrEmpty(message))
+            var message2 = HttpContext.Request.Query["message2"];
+            if (!string.IsNullOrEmpty(message2))
             {
-                Message = message;
+                Message2 = message2;
             }
 
             return base.OnLoadAsync();
