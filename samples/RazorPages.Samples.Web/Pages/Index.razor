@@ -2,14 +2,19 @@
 
 @functions {
     public string Message { get; set; }
+
+    public void OnGet()
+    {
+        Message = HttpContext.Request.Query["message"];
+        if (string.IsNullOrEmpty(Message))
+        {
+            Message = "Hello, World!";
+        }
+    }
 }
 
 @{
-    Message = HttpContext.Request.Query["message"];
-    if (string.IsNullOrEmpty(Message))
-    {
-        Message = "Hello, World!";
-    }
+    OnGet();
 }
 <html>
     <head>
