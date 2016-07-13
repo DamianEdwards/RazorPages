@@ -26,7 +26,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             {
                 if (string.Equals(Path.GetExtension(file.ViewEnginePath), ".razor", StringComparison.Ordinal))
                 {
-                    context.Results.Add(CreateActionDescriptor(file));
+                    AddActionDescriptors(context.Results, file);
                 }
             }
         }
@@ -35,20 +35,24 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         {
         }
 
-        private RazorPageActionDescriptor CreateActionDescriptor(RazorPageFileInfo file)
+        private void AddActionDescriptors(IList<ActionDescriptor> actions, RazorPageFileInfo file)
         {
-            var actionDescriptor = new RazorPageActionDescriptor()
+            var template = file.ViewEnginePath.Substring(1, file.ViewEnginePath.Length - (Path.GetExtension(file.ViewEnginePath).Length + 1));
+            if (string.Equals("Index", template, StringComparison.OrdinalIgnoreCase))
+            {
+                template = string.Empty;
+            }
+
+            actions.Add(new RazorPageActionDescriptor()
             {
                 AttributeRouteInfo = new AttributeRouteInfo()
                 {
-                    Template = file.ViewEnginePath.Substring(1, file.ViewEnginePath.Length - (Path.GetExtension(file.ViewEnginePath).Length + 1)),
+                    Template = template,
                 },
                 DisplayName = $"Page: {file.ViewEnginePath}",
                 RelativePath = "Pages" + file.ViewEnginePath,
                 ViewEnginePath = file.ViewEnginePath,
-            };
-
-            return actionDescriptor;
+            });
         }
 
         private IEnumerable<RazorPageFileInfo> EnumerateFiles()
