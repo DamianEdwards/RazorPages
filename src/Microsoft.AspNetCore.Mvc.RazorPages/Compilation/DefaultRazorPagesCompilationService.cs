@@ -304,12 +304,85 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
         {
             public static HandlerMethod FromSymbol(IMethodSymbol symbol, string verb)
             {
+                var isAsync = false;
+
+                INamedTypeSymbol returnType = null;
+                if (symbol.ReturnsVoid)
+                {
+                    // No return type
+                }
+                else
+                {
+                    returnType = (INamedTypeSymbol)symbol.ReturnType as INamedTypeSymbol;
+
+                    var getAwaiters = returnType.GetMembers("GetAwaiter");
+                    if (getAwaiters.Length == 0)
+                    {
+                        // This is a synchronous method.
+                    }
+                    else
+                    {
+                        // This is an async method.
+                        IMethodSymbol getAwaiter = null;
+                        for (var i = 0; i < getAwaiters.Length; i++)
+                        {
+                            var method = getAwaiters[i] as IMethodSymbol;
+                            if (method == null)
+                            {
+                                continue;
+                            }
+
+                            if (method.Parameters.Length == 0)
+                            {
+                                getAwaiter = method;
+                                break;
+                            }
+                        }
+
+                        if (getAwaiter == null)
+                        {
+                            throw new InvalidOperationException("could not find an GetAwaiter()");
+                        }
+
+                        IMethodSymbol getResult = null;
+                        var getResults = getAwaiter.ReturnType.GetMembers("GetResult");
+                        for (var i = 0; i < getResults.Length; i++)
+                        {
+                            var method = getResults[i] as IMethodSymbol;
+                            if (method == null)
+                            {
+                                continue;
+                            }
+
+                            if (method.Parameters.Length == 0)
+                            {
+                                getResult = method;
+                                break;
+                            }
+                        }
+
+                        if (getResult == null)
+                        {
+                            throw new InvalidOperationException("could not find GetResult()");
+                        }
+
+                        returnType = getResult.ReturnsVoid ? null : (INamedTypeSymbol)getResult.ReturnType;
+                        isAsync = true;
+                    }
+                }
+
                 return new HandlerMethod()
                 {
+                    IsAsync = isAsync,
+                    ReturnType = returnType,
                     Symbol = symbol,
                     Verb = verb,
                 };
             }
+
+            public bool IsAsync { get; private set; }
+
+            public INamedTypeSymbol ReturnType { get; private set; }
 
             public IMethodSymbol Symbol { get; private set; }
 
@@ -319,13 +392,38 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             {
                 builder.AppendFormat(@"
     if (string.Equals(HttpContext.Request.Method, ""{0}"", global::System.StringComparison.Ordinal))
-    {{
-        {1}();
+    {{",
+                    Verb);
+                
+                if (IsAsync && ReturnType == null)
+                {
+                    // async Task
+                    builder.AppendFormat("await {0}();", Symbol.Name);
+                    builder.AppendLine();
+                }
+                else if (IsAsync)
+                {
+                    // async IActionResult
+                    builder.AppendFormat("global::Microsoft.AspNetCore.Mvc.IActionResult result = await {0}();", Symbol.Name);
+                    builder.AppendLine();
+                }
+                else if (ReturnType == null)
+                {
+                    // void
+                    builder.AppendFormat("{0}();", Symbol.Name);
+                    builder.AppendLine();
+                }
+                else
+                {
+                    // IActionResult
+                    builder.AppendFormat("global::Microsoft.AspNetCore.Mvc.IActionResult result = {0}();", Symbol.Name);
+                    builder.AppendLine();
+                }
+
+                builder.AppendLine(@"
         await RenderAsync();
         return;
-    }}", 
-                    Verb, 
-                    Symbol.Name);
+    }");
             }
         }
     }
