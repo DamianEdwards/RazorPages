@@ -12,7 +12,19 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
 {
     public abstract class Page
     {
-        public HttpContext HttpContext { get; set; }
+        public PageContext PageContext { get; set; }
+
+        public HttpContext HttpContext => PageContext.HttpContext;
+
+        protected IActionResult Redirect(string url)
+        {
+            return new RedirectResult(url);
+        }
+
+        protected IActionResult View()
+        {
+            return new PageViewResult(this);
+        }
 
         public virtual async Task ExecuteAsync()
         {

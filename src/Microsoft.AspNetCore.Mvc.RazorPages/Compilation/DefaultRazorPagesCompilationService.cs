@@ -394,6 +394,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
     if (string.Equals(HttpContext.Request.Method, ""{0}"", global::System.StringComparison.Ordinal))
     {{",
                     Verb);
+                builder.AppendLine();
                 
                 if (IsAsync && ReturnType == null)
                 {
@@ -406,6 +407,11 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                     // async IActionResult
                     builder.AppendFormat("global::Microsoft.AspNetCore.Mvc.IActionResult result = await {0}();", Symbol.Name);
                     builder.AppendLine();
+                    builder.AppendLine("if (result != null)");
+                    builder.AppendLine("{");
+                    builder.AppendLine("await result.ExecuteResultAsync(this.PageContext);");
+                    builder.AppendLine("return;");
+                    builder.AppendLine("}");
                 }
                 else if (ReturnType == null)
                 {
@@ -418,6 +424,11 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                     // IActionResult
                     builder.AppendFormat("global::Microsoft.AspNetCore.Mvc.IActionResult result = {0}();", Symbol.Name);
                     builder.AppendLine();
+                    builder.AppendLine("if (result != null)");
+                    builder.AppendLine("{");
+                    builder.AppendLine("await result.ExecuteResultAsync(this.PageContext);");
+                    builder.AppendLine("return;");
+                    builder.AppendLine("}");
                 }
 
                 builder.AppendLine(@"

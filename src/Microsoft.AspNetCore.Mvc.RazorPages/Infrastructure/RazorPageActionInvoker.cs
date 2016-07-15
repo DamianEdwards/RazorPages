@@ -9,7 +9,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 {
     public class RazorPageActionInvoker : IActionInvoker
     {
-        private readonly ActionContext _actionContext;
+        private readonly PageContext _pageContext;
         private readonly IRazorPagesCompilationService _compilationService;
         private readonly IFileProvider _fileProvider;
 
@@ -20,18 +20,23 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         {
             _compilationService = compilationService;
             _fileProvider = fileProvider;
-            _actionContext = actionContext;
+            _pageContext = new PageContext(actionContext);
         }
 
         public Task InvokeAsync()
         {
-            var actionDescriptor = (RazorPageActionDescriptor)_actionContext.ActionDescriptor;
+            var actionDescriptor = (RazorPageActionDescriptor)_pageContext.ActionDescriptor;
             var file = _fileProvider.GetFileInfo(actionDescriptor.RelativePath);
 
-            var type = _compilationService.Compile(file.CreateReadStream(), actionDescriptor.RelativePath);
+            Type type;
+            using (var stream = file.CreateReadStream())
+            {
+                type = _compilationService.Compile(file.CreateReadStream(), actionDescriptor.RelativePath);
+            }
+
             var page = (Page)Activator.CreateInstance(type);
 
-            page.HttpContext = _actionContext.HttpContext;
+            page.PageContext = _pageContext;
             return page.ExecuteAsync();
         }
     }
