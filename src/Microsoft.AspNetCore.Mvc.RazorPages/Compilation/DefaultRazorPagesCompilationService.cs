@@ -74,8 +74,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
 
             var classSymbol = compilation.GetTypeByMetadataName(classFullName);
 
-            IMethodSymbol onGet = null;
-            IMethodSymbol onPost = null;
+            HandlerMethod onGet = null;
+            HandlerMethod onPost = null;
 
             foreach (var method in classSymbol.GetMembers().OfType<IMethodSymbol>())
             {
@@ -86,7 +86,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                         throw new InvalidOperationException("You can't have more than one OnGet method");
                     }
 
-                    onGet = method;
+                    onGet = HandlerMethod.FromSymbol(method, "GET");
                 }
                 else if (method.Name.StartsWith("OnPost", StringComparison.Ordinal))
                 {
@@ -95,7 +95,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                         throw new InvalidOperationException("You can't have more than one OnPost method");
                     }
 
-                    onPost = method;
+                    onPost= HandlerMethod.FromSymbol(method, "POST");
                 }
             }
 
@@ -121,7 +121,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             }
         }
 
-        private void GenerateExecuteAsyncMethod(ref CSharpCompilation compilation, IMethodSymbol onGet, IMethodSymbol onPost)
+        private void GenerateExecuteAsyncMethod(ref CSharpCompilation compilation, HandlerMethod onGet, HandlerMethod onPost)
         {
             if (onGet == null && onPost == null)
             {
@@ -134,24 +134,12 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             
             if (onGet != null)
             {
-                builder.AppendFormat(@"
-    if (string.Equals(HttpContext.Request.Method, ""GET"", global::System.StringComparison.Ordinal))
-    {{
-        {0}();
-        await RenderAsync();
-        return;
-    }}", onGet.Name);
+                onGet.GenerateCode(builder);
             }
 
             if (onPost != null)
             {
-                builder.AppendFormat(@"
-    if (string.Equals(HttpContext.Request.Method, ""POST"", global::System.StringComparison.Ordinal))
-    {{
-        {0}();
-        await RenderAsync();
-        return;
-    }}", onPost.Name);
+                onPost.GenerateCode(builder);
             }
 
             builder.AppendLine("await RenderAsync();");
@@ -310,6 +298,35 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             }
 
             return @namespace.ToString();
+        }
+
+        private class HandlerMethod
+        {
+            public static HandlerMethod FromSymbol(IMethodSymbol symbol, string verb)
+            {
+                return new HandlerMethod()
+                {
+                    Symbol = symbol,
+                    Verb = verb,
+                };
+            }
+
+            public IMethodSymbol Symbol { get; private set; }
+
+            public string Verb { get; private set; }
+
+            public void GenerateCode(StringBuilder builder)
+            {
+                builder.AppendFormat(@"
+    if (string.Equals(HttpContext.Request.Method, ""{0}"", global::System.StringComparison.Ordinal))
+    {{
+        {1}();
+        await RenderAsync();
+        return;
+    }}", 
+                    Verb, 
+                    Symbol.Name);
+            }
         }
     }
 }
