@@ -5,16 +5,25 @@
 
     public void OnGet()
     {
+        Message2 = "This was a GET";
+
         Message = HttpContext.Request.Query["message"];
         if (string.IsNullOrEmpty(Message))
         {
             Message = "Hello, World!";
         }
     }
-}
 
-@{
-    OnGet();
+    public void OnPost()
+    {
+        Message = "This was a POST";
+
+        Message2 = HttpContext.Request.Form["message"];
+        if (string.IsNullOrEmpty(Message2))
+        {
+            Message2 = "Hello, World!";
+        }
+    }
 }
 <html>
     <head>
@@ -24,5 +33,9 @@
         <h1>Message from codebehind: @Message2</h1>
         <h1>My class: @GetType().GetTypeInfo().FullName</h1>
         <h1>Base class: @GetType().GetTypeInfo().BaseType.FullName</h1>
+        <form method="POST">
+            <input type="text" name="message" />
+            <input type="submit" value="Submit"/>
+        </form>
     </body>
 </html>

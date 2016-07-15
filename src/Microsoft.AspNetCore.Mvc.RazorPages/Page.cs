@@ -16,14 +16,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
 
         public virtual async Task ExecuteAsync()
         {
-            await OnLoadAsync();
-
             await RenderAsync();
-        }
-
-        public virtual Task OnLoadAsync()
-        {
-            return TaskCache.CompletedTask;
         }
 
         public virtual Task RenderAsync()

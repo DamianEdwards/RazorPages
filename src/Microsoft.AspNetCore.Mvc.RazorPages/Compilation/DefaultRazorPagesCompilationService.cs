@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages.Compilation.Rewriters;
 using Microsoft.AspNetCore.Razor;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
@@ -40,6 +41,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             var baseClass = Path.GetFileNameWithoutExtension(Path.GetFileName(relativePath));
             var @class = "Generated_" + baseClass;
             var @namespace = GetNamespace(relativePath);
+            var baseClassFullName = @namespace + "." + baseClass;
+            var classFullName = @namespace + "." + @class;
 
             var generatorResults = engine.GenerateCode(
                 stream,
@@ -65,9 +68,38 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             {
                 // base class exists, use it.
                 var original = tree;
-                tree = CSharpSyntaxTree.Create((CSharpSyntaxNode)new BaseClassRewriter(@class, @namespace + "." + baseClass).Visit(tree.GetRoot()));
+                tree = CSharpSyntaxTree.Create((CSharpSyntaxNode)new BaseClassRewriter(@class, baseClassFullName).Visit(tree.GetRoot()));
                 compilation = compilation.ReplaceSyntaxTree(original, tree);
             }
+
+            var classSymbol = compilation.GetTypeByMetadataName(classFullName);
+
+            IMethodSymbol onGet = null;
+            IMethodSymbol onPost = null;
+
+            foreach (var method in classSymbol.GetMembers().OfType<IMethodSymbol>())
+            {
+                if (method.Name.StartsWith("OnGet", StringComparison.Ordinal))
+                {
+                    if (onGet != null)
+                    {
+                        throw new InvalidOperationException("You can't have more than one OnGet method");
+                    }
+
+                    onGet = method;
+                }
+                else if (method.Name.StartsWith("OnPost", StringComparison.Ordinal))
+                {
+                    if (onPost != null)
+                    {
+                        throw new InvalidOperationException("You can't have more than one OnPost method");
+                    }
+
+                    onPost = method;
+                }
+            }
+
+            GenerateExecuteAsyncMethod(ref compilation, onGet, onPost);
 
             using (var pe = new MemoryStream())
             {
@@ -87,6 +119,53 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                     return type;
                 }
             }
+        }
+
+        private void GenerateExecuteAsyncMethod(ref CSharpCompilation compilation, IMethodSymbol onGet, IMethodSymbol onPost)
+        {
+            if (onGet == null && onPost == null)
+            {
+                return;
+            }
+
+            var builder = new StringBuilder();
+            builder.AppendLine("public override async Task ExecuteAsync()");
+            builder.AppendLine("{");
+            
+            if (onGet != null)
+            {
+                builder.AppendFormat(@"
+    if (string.Equals(HttpContext.Request.Method, ""GET"", global::System.StringComparison.Ordinal))
+    {{
+        {0}();
+        await RenderAsync();
+        return;
+    }}", onGet.Name);
+            }
+
+            if (onPost != null)
+            {
+                builder.AppendFormat(@"
+    if (string.Equals(HttpContext.Request.Method, ""POST"", global::System.StringComparison.Ordinal))
+    {{
+        {0}();
+        await RenderAsync();
+        return;
+    }}", onPost.Name);
+            }
+
+            builder.AppendLine("await RenderAsync();");
+
+            builder.AppendLine("}");
+
+            var parsed = CSharpSyntaxTree.ParseText(builder.ToString());
+            var root = parsed.GetCompilationUnitRoot();
+            var method = (MethodDeclarationSyntax)root.DescendantNodes(node => !(node is MethodDeclarationSyntax)).ToArray()[0];
+
+            var original = compilation.SyntaxTrees[0];
+
+            var tree = CSharpSyntaxTree.Create((CSharpSyntaxNode)new AddMemberRewriter(method).Visit(original.GetRoot()));
+            compilation = compilation.ReplaceSyntaxTree(original, tree);
         }
 
         private void Throw(Stream stream, string relativePath, IEnumerable<RazorError> errors)
