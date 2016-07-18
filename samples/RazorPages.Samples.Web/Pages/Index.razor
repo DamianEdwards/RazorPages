@@ -8,22 +8,14 @@
     {
         Message2 = "This was a GET";
 
-        Message = HttpContext.Request.Query["message"];
-        if (string.IsNullOrEmpty(Message))
-        {
-            Message = "Hello, World!";
-        }
+        Message = await BindAsync<string>("message") ?? "Hello, World!";
     }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPost()
     {
         Message = "This was a POST";
 
-        Message2 = HttpContext.Request.Form["message"];
-        if (string.IsNullOrEmpty(Message2))
-        {
-            Message2 = "Hello, World!";
-        }
+        Message2 = await BindAsync<string>("message") ?? "Hello, World!";
 
         if (Message2 == "redirect")
         {

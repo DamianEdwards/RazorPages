@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.RazorPages.Compilation;
 using Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure;
+using Microsoft.AspNetCore.Mvc.RazorPages.ModelBinding;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
@@ -57,6 +58,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddSingleton<IRazorPagesCompilationService, DefaultRazorPagesCompilationService>();
             services.TryAddSingleton<RazorPagesRazorEngineHost>();
+
+            services.TryAddSingleton<IPageArgumentBinder, DefaultPageArgumentBinder>();
 
             services.TryAddEnumerable(ServiceDescriptor.Transient<IConfigureOptions<RazorPagesOptions>, DefaultRazorPagesOptionsSetup>());
         }

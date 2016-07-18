@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages.Compilation;
 using Microsoft.Extensions.FileProviders;
 
@@ -16,11 +19,15 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         public RazorPageActionInvoker(
             IRazorPagesCompilationService compilationService,
             IFileProvider fileProvider,
+            IReadOnlyList<IValueProviderFactory> valueProviderFactories,
             ActionContext actionContext)
         {
             _compilationService = compilationService;
             _fileProvider = fileProvider;
-            _pageContext = new PageContext(actionContext);
+            _pageContext = new PageContext(actionContext)
+            {
+                ValueProviderFactories = new CopyOnWriteList<IValueProviderFactory>(valueProviderFactories),
+            };
         }
 
         public Task InvokeAsync()
@@ -31,7 +38,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             Type type;
             using (var stream = file.CreateReadStream())
             {
-                type = _compilationService.Compile(file.CreateReadStream(), actionDescriptor.RelativePath);
+                type = _compilationService.Compile(stream, actionDescriptor.RelativePath);
             }
 
             var page = (Page)Activator.CreateInstance(type);

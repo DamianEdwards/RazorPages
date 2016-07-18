@@ -5,16 +5,30 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.Mvc.RazorPages.ModelBinding;
 using Microsoft.AspNetCore.Razor.Runtime.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages
 {
     public abstract class Page
     {
+        private IPageArgumentBinder _binder;
+
         public PageContext PageContext { get; set; }
 
         public HttpContext HttpContext => PageContext.HttpContext;
+
+        protected async Task<T> BindAsync<T>(string name)
+        {
+            if (_binder == null)
+            {
+                _binder = PageContext.HttpContext.RequestServices.GetRequiredService<IPageArgumentBinder>();
+            }
+
+            return (T)(await _binder.BindAsync(PageContext, typeof(T), name) ?? default(T));
+        }
 
         protected IActionResult Redirect(string url)
         {
