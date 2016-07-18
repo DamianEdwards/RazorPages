@@ -2,18 +2,24 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 {
     public class RazorPageActionDescriptorProvider : IActionDescriptorProvider
     {
         private readonly IFileProvider _fileProvider;
+        private readonly MvcOptions _options;
 
-        public RazorPageActionDescriptorProvider(IRazorPagesFileProviderAccessor fileProvider)
+        public RazorPageActionDescriptorProvider(
+            IRazorPagesFileProviderAccessor fileProvider,
+            IOptions<MvcOptions> options)
         {
             _fileProvider = fileProvider.FileProvider;
+            _options = options.Value;
         }
 
         public int Order { get; set; }
@@ -41,6 +47,12 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                 template = string.Empty;
             }
 
+            var filters = new List<FilterDescriptor>(_options.Filters.Count);
+            for (var i = 0; i < _options.Filters.Count; i++)
+            {
+                filters.Add(new FilterDescriptor(_options.Filters[i], FilterScope.Global));
+            }
+
             actions.Add(new RazorPageActionDescriptor()
             {
                 AttributeRouteInfo = new AttributeRouteInfo()
@@ -48,6 +60,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                     Template = template,
                 },
                 DisplayName = $"Page: {file.ViewEnginePath}",
+                FilterDescriptors = filters,
                 RelativePath = "Pages" + file.ViewEnginePath,
                 ViewEnginePath = file.ViewEnginePath,
             });
