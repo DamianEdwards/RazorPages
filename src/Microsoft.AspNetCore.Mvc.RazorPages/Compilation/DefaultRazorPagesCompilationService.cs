@@ -395,17 +395,26 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
     {{",
                     Verb);
                 builder.AppendLine();
+
+                for (var i = 0; i < Symbol.Parameters.Length; i++)
+                {
+                    var parameter = Symbol.Parameters[i];
+                    var parameterTypeFullName = parameter.Type.ContainingNamespace + "." + parameter.Type.Name;
+
+                    builder.AppendFormat("var param{0} = await BindAsync<global::{1}>(\"{2}\");", i, parameterTypeFullName, parameter.Name);
+                    builder.AppendLine();
+                }
                 
                 if (IsAsync && ReturnType == null)
                 {
                     // async Task
-                    builder.AppendFormat("await {0}();", Symbol.Name);
+                    builder.AppendFormat("await {0}({1});", Symbol.Name, string.Join(", ", Symbol.Parameters.Select((p, i) => "param" + i)));
                     builder.AppendLine();
                 }
                 else if (IsAsync)
                 {
                     // async IActionResult
-                    builder.AppendFormat("global::Microsoft.AspNetCore.Mvc.IActionResult result = await {0}();", Symbol.Name);
+                    builder.AppendFormat("global::Microsoft.AspNetCore.Mvc.IActionResult result = await {0}({1});", Symbol.Name, string.Join(", ", Symbol.Parameters.Select((p, i) => "param" + i)));
                     builder.AppendLine();
                     builder.AppendLine("if (result != null)");
                     builder.AppendLine("{");
@@ -416,13 +425,13 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                 else if (ReturnType == null)
                 {
                     // void
-                    builder.AppendFormat("{0}();", Symbol.Name);
+                    builder.AppendFormat("{0}({1});", Symbol.Name, string.Join(", ", Symbol.Parameters.Select((p, i) => "param" + i)));
                     builder.AppendLine();
                 }
                 else
                 {
                     // IActionResult
-                    builder.AppendFormat("global::Microsoft.AspNetCore.Mvc.IActionResult result = {0}();", Symbol.Name);
+                    builder.AppendFormat("global::Microsoft.AspNetCore.Mvc.IActionResult result = {0}({1});", Symbol.Name, string.Join(", ", Symbol.Parameters.Select((p, i) => "param" + i)));
                     builder.AppendLine();
                     builder.AppendLine("if (result != null)");
                     builder.AppendLine("{");

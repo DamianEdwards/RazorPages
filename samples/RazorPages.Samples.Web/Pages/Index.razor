@@ -1,21 +1,22 @@
-﻿@using System.Reflection
+﻿@using System
+@using System.Reflection
 @using Microsoft.AspNetCore.Mvc
 
 @functions {
     public string Message { get; set; }
 
-    public async Task OnGetAsync()
+    public async Task OnGetAsync(string message)
     {
         Message2 = "This was a GET";
 
-        Message = await BindAsync<string>("message") ?? "Hello, World!";
+        Message = message ?? "Hello, World!";
     }
 
-    public async Task<IActionResult> OnPost()
+    public async Task<IActionResult> OnPost(string message)
     {
         Message = "This was a POST";
 
-        Message2 = await BindAsync<string>("message") ?? "Hello, World!";
+        Message2 = message ?? "Hello, World!";
 
         if (Message2 == "redirect")
         {
