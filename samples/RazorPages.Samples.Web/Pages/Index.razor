@@ -1,6 +1,7 @@
 ﻿@using System
 @using System.Reflection
 @using Microsoft.AspNetCore.Mvc
+@using Microsoft.AspNetCore.Mvc.Rendering
 
 @functions {
     public string Message { get; set; }
@@ -38,5 +39,6 @@
             <input type="text" name="message" />
             <input type="submit" value="Submit"/>
         </form>
+        @Html.RouteLink("Reload it!", new { page = "/Index.razor" })
     </body>
 </html>

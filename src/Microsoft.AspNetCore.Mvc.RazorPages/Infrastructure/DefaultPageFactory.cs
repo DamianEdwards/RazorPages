@@ -1,6 +1,7 @@
 ﻿
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc.Razor.Internal;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
@@ -26,6 +27,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                 if (property.GetCustomAttribute(typeof(RazorInjectAttribute)) != null)
                 {
                     var service = context.HttpContext.RequestServices.GetRequiredService(property.PropertyType);
+                    (service as IViewContextAware)?.Contextualize(context);
+
                     property.SetValue(page, service);
                 }
             }

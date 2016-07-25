@@ -1,17 +1,29 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure;
+using Microsoft.AspNetCore.Mvc.RazorPages.Internal;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages
 {
-    public class PageContext : ActionContext
+    public class PageContext : ViewContext
     {
         private IList<IValueProviderFactory> _valueProviderFactories;
 
-        public PageContext(ActionContext actionContext)
-            : base(actionContext)
+        public PageContext()
+        {
+        }
+
+        public PageContext(
+            ActionContext actionContext,
+            ViewDataDictionary viewData,
+            ITempDataDictionary tempDataDictionary,
+            HtmlHelperOptions htmlHelperOptions)
+            : base(actionContext, NullView.Instance, viewData, tempDataDictionary, TextWriter.Null, htmlHelperOptions)
         {
         }
 
@@ -19,6 +31,12 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
         {
             get { return (CompiledPageActionDescriptor)base.ActionDescriptor; }
             set { base.ActionDescriptor = value; }
+        }
+
+        public Page Page
+        {
+            get { return (Page)base.View; }
+            set { base.View = value; }
         }
 
         public IList<IValueProviderFactory> ValueProviderFactories

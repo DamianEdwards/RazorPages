@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages.Compilation;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -19,6 +20,9 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         private readonly IPageFactory _factory;
         private readonly IPageCompilationService _compilationService;
         private readonly IValueProviderFactory[] _valueProviderFactories;
+        private readonly IModelMetadataProvider _metadataProvider;
+        private readonly ITempDataDictionaryFactory _tempDataFactory;
+        private readonly IOptions<MvcViewOptions> _viewOptions;
 
         public PageActionInvokerProvider(
             IPageFactory factory,
@@ -26,11 +30,17 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             DiagnosticListener diagnosticSource,
             ILoggerFactory loggerFactory,
             IEnumerable<IFilterProvider> filterProviders,
-            IOptions<MvcOptions> options)
+            IModelMetadataProvider metadataProvider,
+            ITempDataDictionaryFactory tempDataFactory,
+            IOptions<MvcOptions> options,
+            IOptions<MvcViewOptions> viewOptions)
         {
             _factory = factory;
             _diagnosticSource = diagnosticSource;
             _compilationService = compilationService;
+            _metadataProvider = metadataProvider;
+            _tempDataFactory = tempDataFactory;
+            _viewOptions = viewOptions;
 
             _filterProviders = filterProviders.OrderBy(fp => fp.Order).ToArray();
             _logger = loggerFactory.CreateLogger<PageActionInvoker>();
@@ -81,6 +91,9 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                     _diagnosticSource,
                     _logger,
                     _factory,
+                    _metadataProvider, 
+                    _tempDataFactory,
+                    _viewOptions,
                     filters,
                     _valueProviderFactories,
                     context.ActionContext,

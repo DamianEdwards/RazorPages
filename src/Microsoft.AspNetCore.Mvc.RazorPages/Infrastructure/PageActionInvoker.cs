@@ -7,17 +7,25 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 {
     public class PageActionInvoker : IActionInvoker
     {
         private readonly IPageFactory _factory;
+        private readonly IModelMetadataProvider _metadataProvider;
+        private readonly ITempDataDictionaryFactory _tempDataFactory;
+        private readonly MvcViewOptions _viewOptions;
         private readonly DiagnosticListener _diagnosticSource;
         private readonly ILogger _logger;
 
-        private readonly PageContext _pageContext;
+        private readonly ActionContext _actionContext;
+        private readonly CompiledPageActionDescriptor _actionDescriptor;
+        private readonly IList<IValueProviderFactory> _valueProviderFactories;
+
         private readonly IFilterMetadata[] _filters;
         private FilterCursor _cursor; // Mutable struct. DO NOT make this readonly
 
@@ -29,6 +37,9 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             DiagnosticListener diagnosticSource,
             ILogger logger,
             IPageFactory factory,
+            IModelMetadataProvider metadataProvider,
+            ITempDataDictionaryFactory tempDataFactory,
+            IOptions<MvcViewOptions> viewOptions,
             IFilterMetadata[] filters,
             IReadOnlyList<IValueProviderFactory> valueProviderFactories,
             ActionContext actionContext,
@@ -37,14 +48,15 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             _diagnosticSource = diagnosticSource;
             _logger = logger;
             _factory = factory;
+            _metadataProvider = metadataProvider;
+            _tempDataFactory = tempDataFactory;
+            _viewOptions = viewOptions.Value;
             _filters = filters;
+            _valueProviderFactories = new CopyOnWriteList<IValueProviderFactory>(valueProviderFactories);
+            _actionContext = actionContext;
+            _actionDescriptor = actionDescriptor;
 
             _cursor = new FilterCursor(_filters);
-            _pageContext = new PageContext(actionContext)
-            {
-                ActionDescriptor = actionDescriptor,
-                ValueProviderFactories = new CopyOnWriteList<IValueProviderFactory>(valueProviderFactories),
-            };
         }
 
         public async Task InvokeAsync()
@@ -82,7 +94,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                         {
                             if (_authorizationContext == null)
                             {
-                                _authorizationContext = new AuthorizationFilterContext(_pageContext, _filters);
+                                _authorizationContext = new AuthorizationFilterContext(_actionContext, _filters);
                             }
 
                             state = current.FilterAsync;
@@ -92,7 +104,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                         {
                             if (_authorizationContext == null)
                             {
-                                _authorizationContext = new AuthorizationFilterContext(_pageContext, _filters);
+                                _authorizationContext = new AuthorizationFilterContext(_actionContext, _filters);
                             }
 
                             state = current.Filter;
@@ -186,9 +198,9 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                             if (_resourceExecutingContext == null)
                             {
                                 _resourceExecutingContext = new ResourceExecutingContext(
-                                    _pageContext,
+                                    _actionContext,
                                     _filters,
-                                    _pageContext.ValueProviderFactories);
+                                    _valueProviderFactories);
                             }
 
                             state = current.FilterAsync;
@@ -199,9 +211,9 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                             if (_resourceExecutingContext == null)
                             {
                                 _resourceExecutingContext = new ResourceExecutingContext(
-                                    _pageContext,
+                                    _actionContext,
                                     _filters,
-                                    _pageContext.ValueProviderFactories);
+                                    _valueProviderFactories);
                             }
 
                             state = current.Filter;
@@ -352,7 +364,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                         if (scope == Scope.Resource)
                         {
                             Debug.Assert(_resourceExecutedContext == null);
-                            _resourceExecutedContext = new ResourceExecutedContext(_pageContext, _filters);
+                            _resourceExecutedContext = new ResourceExecutedContext(_actionContext, _filters);
 
                             isCompleted = true;
                             return TaskCache.CompletedTask;
@@ -420,23 +432,33 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 
         private Task ExecutePageAsync()
         {
-            var page = (Page)_factory.CreatePage(_pageContext);
+            var viewData = new ViewDataDictionary<object>(_metadataProvider, _actionContext.ModelState);
+            
+            var tempData = _tempDataFactory.GetTempData(_actionContext.HttpContext);
+
+            var pageContext = new PageContext(_actionContext, viewData, tempData, _viewOptions.HtmlHelperOptions)
+            {
+                ActionDescriptor = _actionDescriptor,
+                ValueProviderFactories = _valueProviderFactories,
+            };
+
+            var page = (Page)_factory.CreatePage(pageContext);
             return page.ExecuteAsync();
         }
 
         private async Task InvokeResultAsync(IActionResult result)
         {
-            var pageContext = _pageContext;
+            var actionContext = _actionContext;
 
-            _diagnosticSource.BeforeActionResult(pageContext, result);
+            _diagnosticSource.BeforeActionResult(actionContext, result);
 
             try
             {
-                await result.ExecuteResultAsync(pageContext);
+                await result.ExecuteResultAsync(actionContext);
             }
             finally
             {
-                _diagnosticSource.AfterActionResult(pageContext, result);
+                _diagnosticSource.AfterActionResult(actionContext, result);
             }
         }
 
