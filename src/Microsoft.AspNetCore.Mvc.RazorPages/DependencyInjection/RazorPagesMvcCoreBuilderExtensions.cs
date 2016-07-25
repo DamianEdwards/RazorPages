@@ -58,7 +58,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IPageFactory, DefaultPageFactory>();
             services.TryAddSingleton<IPageActivator, DefaultPageActivator>();
 
-            services.TryAddSingleton<IPageProviderAccessor, DefaultPageFileProviderAccessor>();
+            services.TryAddSingleton<IPageFileProviderAccessor, DefaultPageFileProviderAccessor>();
 
             services.TryAddSingleton<IPageCompilationService, DefaultPageCompilationService>();
             services.TryAddSingleton<PageRazorEngineHost>();

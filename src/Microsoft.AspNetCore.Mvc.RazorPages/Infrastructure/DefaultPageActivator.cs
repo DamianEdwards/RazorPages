@@ -11,7 +11,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 
         public DefaultPageActivator(
             IPageCompilationService compilationService,
-            IPageProviderAccessor fileProvider)
+            IPageFileProviderAccessor fileProvider)
         {
             _compilationService = compilationService;
             _fileProvider = fileProvider.FileProvider;
@@ -19,16 +19,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 
         public object Create(PageContext context)
         {
-            var actionDescriptor = (PageActionDescriptor)context.ActionDescriptor;
-            var file = _fileProvider.GetFileInfo(actionDescriptor.RelativePath);
-
-            Type type;
-            using (var stream = file.CreateReadStream())
-            {
-                type = _compilationService.Compile(stream, actionDescriptor.RelativePath);
-            }
-
-            return Activator.CreateInstance(type);
+            return Activator.CreateInstance(context.ActionDescriptor.PageType.AsType());
         }
 
         public void Release(PageContext context, object page)

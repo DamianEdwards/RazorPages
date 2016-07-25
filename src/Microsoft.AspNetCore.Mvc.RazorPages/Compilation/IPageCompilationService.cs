@@ -1,11 +1,10 @@
-﻿
-using System;
-using System.IO;
+﻿using System;
+using Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
 {
     public interface IPageCompilationService
     {
-        Type Compile(Stream stream, string relativePath);
+        Type Compile(PageActionDescriptor actionDescriptor);
     }
 }

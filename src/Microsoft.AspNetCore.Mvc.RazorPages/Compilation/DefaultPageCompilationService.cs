@@ -7,11 +7,13 @@ using System.Text;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.RazorPages.Compilation.Rewriters;
+using Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure;
 using Microsoft.AspNetCore.Razor;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using Microsoft.Extensions.FileProviders;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
 {
@@ -19,19 +21,31 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
     {
         private readonly PageRazorEngineHost _host;
         private readonly ApplicationPartManager _partManager;
+        private readonly IFileProvider _fileProvider;
 
         private readonly string _baseNamespace;
 
         public DefaultPageCompilationService(
             ApplicationPartManager partManager,
-            PageRazorEngineHost host)
+            PageRazorEngineHost host,
+            IPageFileProviderAccessor fileProvider)
         {
             _partManager = partManager;
             _host = host;
+            _fileProvider = fileProvider.FileProvider;
 
             // For now let's assume the first part is the "app" assembly, and the assembly name is the "base"
             // namespace.
             _baseNamespace = _partManager.ApplicationParts.Cast<AssemblyPart>().First().Assembly.GetName().Name;
+        }
+
+        public Type Compile(PageActionDescriptor actionDescriptor)
+        {
+            var file = _fileProvider.GetFileInfo(actionDescriptor.RelativePath);
+            using (var stream = file.CreateReadStream())
+            {
+                return Compile(stream, actionDescriptor.RelativePath);
+            }
         }
 
         public Type Compile(Stream stream, string relativePath)

@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.RazorPages.Compilation;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,10 +17,12 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         private readonly ILogger _logger;
         private readonly IFilterProvider[] _filterProviders;
         private readonly IPageFactory _factory;
+        private readonly IPageCompilationService _compilationService;
         private readonly IValueProviderFactory[] _valueProviderFactories;
 
         public PageActionInvokerProvider(
             IPageFactory factory,
+            IPageCompilationService compilationService, 
             DiagnosticListener diagnosticSource,
             ILoggerFactory loggerFactory,
             IEnumerable<IFilterProvider> filterProviders,
@@ -26,6 +30,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         {
             _factory = factory;
             _diagnosticSource = diagnosticSource;
+            _compilationService = compilationService;
 
             _filterProviders = filterProviders.OrderBy(fp => fp.Order).ToArray();
             _logger = loggerFactory.CreateLogger<PageActionInvoker>();
@@ -65,13 +70,21 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                     filters[i] = filterProviderContext.Results[i].Filter;
                 }
 
+                var compiledType = _compilationService.Compile(actionDescriptor);
+
+                var compiledActionDescriptor = new CompiledPageActionDescriptor(actionDescriptor)
+                {
+                    PageType = compiledType.GetTypeInfo(),
+                };
+
                 context.Result = new PageActionInvoker(
                     _diagnosticSource,
                     _logger,
                     _factory,
                     filters,
                     _valueProviderFactories,
-                    context.ActionContext);
+                    context.ActionContext,
+                    compiledActionDescriptor);
             }
         }
 

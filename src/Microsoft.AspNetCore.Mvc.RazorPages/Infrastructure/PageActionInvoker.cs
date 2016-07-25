@@ -31,7 +31,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             IPageFactory factory,
             IFilterMetadata[] filters,
             IReadOnlyList<IValueProviderFactory> valueProviderFactories,
-            ActionContext actionContext)
+            ActionContext actionContext,
+            CompiledPageActionDescriptor actionDescriptor)
         {
             _diagnosticSource = diagnosticSource;
             _logger = logger;
@@ -41,6 +42,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             _cursor = new FilterCursor(_filters);
             _pageContext = new PageContext(actionContext)
             {
+                ActionDescriptor = actionDescriptor,
                 ValueProviderFactories = new CopyOnWriteList<IValueProviderFactory>(valueProviderFactories),
             };
         }

@@ -15,7 +15,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         private readonly MvcOptions _options;
 
         public PageActionDescriptorProvider(
-            IPageProviderAccessor fileProvider,
+            IPageFileProviderAccessor fileProvider,
             IOptions<MvcOptions> options)
         {
             _fileProvider = fileProvider.FileProvider;

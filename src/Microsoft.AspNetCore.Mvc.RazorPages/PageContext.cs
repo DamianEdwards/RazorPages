@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages
 {
@@ -13,6 +13,12 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
         public PageContext(ActionContext actionContext)
             : base(actionContext)
         {
+        }
+
+        public new CompiledPageActionDescriptor ActionDescriptor
+        {
+            get { return (CompiledPageActionDescriptor)base.ActionDescriptor; }
+            set { base.ActionDescriptor = value; }
         }
 
         public IList<IValueProviderFactory> ValueProviderFactories
