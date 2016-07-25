@@ -15,10 +15,9 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 {
     public class RazorPageActionInvoker : IActionInvoker
     {
-        private readonly IRazorPagesCompilationService _compilationService;
+        private readonly IPageFactory _factory;
         private readonly DiagnosticListener _diagnosticSource;
         private readonly ILogger _logger;
-        private readonly IFileProvider _fileProvider;
 
         private readonly PageContext _pageContext;
         private readonly IFilterMetadata[] _filters;
@@ -31,16 +30,14 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         public RazorPageActionInvoker(
             DiagnosticListener diagnosticSource,
             ILogger logger,
-            IRazorPagesCompilationService compilationService,
-            IFileProvider fileProvider,
+            IPageFactory factory,
             IFilterMetadata[] filters,
             IReadOnlyList<IValueProviderFactory> valueProviderFactories,
             ActionContext actionContext)
         {
             _diagnosticSource = diagnosticSource;
             _logger = logger;
-            _compilationService = compilationService;
-            _fileProvider = fileProvider;
+            _factory = factory;
             _filters = filters;
 
             _cursor = new FilterCursor(_filters);
@@ -354,6 +351,9 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                     {
                         if (scope == Scope.Resource)
                         {
+                            Debug.Assert(_resourceExecutedContext == null);
+                            _resourceExecutedContext = new ResourceExecutedContext(_pageContext, _filters);
+
                             isCompleted = true;
                             return TaskCache.CompletedTask;
                         }
@@ -420,18 +420,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 
         private Task ExecutePageAsync()
         {
-            var actionDescriptor = (RazorPageActionDescriptor)_pageContext.ActionDescriptor;
-            var file = _fileProvider.GetFileInfo(actionDescriptor.RelativePath);
-
-            Type type;
-            using (var stream = file.CreateReadStream())
-            {
-                type = _compilationService.Compile(stream, actionDescriptor.RelativePath);
-            }
-
-            var page = (Page)Activator.CreateInstance(type);
-
-            page.PageContext = _pageContext;
+            var page = (Page)_factory.CreatePage(_pageContext);
             return page.ExecuteAsync();
         }
 

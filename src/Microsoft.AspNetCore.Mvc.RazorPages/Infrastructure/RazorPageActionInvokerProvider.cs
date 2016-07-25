@@ -4,8 +4,6 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.RazorPages.Compilation;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -15,21 +13,18 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
     {
         private readonly DiagnosticListener _diagnosticSource;
         private readonly ILogger _logger;
-        private readonly IFileProvider _fileProvider;
         private readonly IFilterProvider[] _filterProviders;
-        private readonly IRazorPagesCompilationService _compilationService;
+        private readonly IPageFactory _factory;
         private readonly IValueProviderFactory[] _valueProviderFactories;
 
         public RazorPageActionInvokerProvider(
-            IRazorPagesCompilationService compilationService,
-            IRazorPagesFileProviderAccessor fileProvider,
+            IPageFactory factory,
             DiagnosticListener diagnosticSource,
             ILoggerFactory loggerFactory,
             IEnumerable<IFilterProvider> filterProviders,
             IOptions<MvcOptions> options)
         {
-            _compilationService = compilationService;
-            _fileProvider = fileProvider.FileProvider;
+            _factory = factory;
             _diagnosticSource = diagnosticSource;
 
             _filterProviders = filterProviders.OrderBy(fp => fp.Order).ToArray();
@@ -73,8 +68,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                 context.Result = new RazorPageActionInvoker(
                     _diagnosticSource,
                     _logger,
-                    _compilationService,
-                    _fileProvider,
+                    _factory,
                     filters,
                     _valueProviderFactories,
                     context.ActionContext);

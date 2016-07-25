@@ -142,7 +142,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                 onPost.GenerateCode(builder);
             }
 
-            builder.AppendLine("await RenderAsync();");
+            builder.AppendLine("await (this.View().ExecuteResultAsync(this.PageContext));");
 
             builder.AppendLine("}");
 
@@ -441,7 +441,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                 }
 
                 builder.AppendLine(@"
-        await RenderAsync();
+        await (this.View().ExecuteResultAsync(this.PageContext));
         return;
     }");
             }
