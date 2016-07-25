@@ -2,7 +2,7 @@
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 {
-    public class RazorPageActionDescriptor : ActionDescriptor
+    public class PageActionDescriptor : ActionDescriptor
     {
         public string RelativePath { get; set; }
 

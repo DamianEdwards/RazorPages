@@ -52,16 +52,16 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void RegisterServices(IServiceCollection services)
         {
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IActionDescriptorProvider, RazorPageActionDescriptorProvider>());
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IActionInvokerProvider, RazorPageActionInvokerProvider>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IActionDescriptorProvider, PageActionDescriptorProvider>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IActionInvokerProvider, PageActionInvokerProvider>());
 
             services.TryAddSingleton<IPageFactory, DefaultPageFactory>();
             services.TryAddSingleton<IPageActivator, DefaultPageActivator>();
 
-            services.TryAddSingleton<IRazorPagesFileProviderAccessor, DefaultRazorPagesFileProviderAccessor>();
+            services.TryAddSingleton<IPageProviderAccessor, DefaultPageFileProviderAccessor>();
 
-            services.TryAddSingleton<IRazorPagesCompilationService, DefaultRazorPagesCompilationService>();
-            services.TryAddSingleton<RazorPagesRazorEngineHost>();
+            services.TryAddSingleton<IPageCompilationService, DefaultPageCompilationService>();
+            services.TryAddSingleton<PageRazorEngineHost>();
 
             services.TryAddSingleton<IPageArgumentBinder, DefaultPageArgumentBinder>();
 

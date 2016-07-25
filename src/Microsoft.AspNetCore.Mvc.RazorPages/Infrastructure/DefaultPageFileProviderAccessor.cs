@@ -3,9 +3,9 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 {
-    public class DefaultRazorPagesFileProviderAccessor : IRazorPagesFileProviderAccessor
+    public class DefaultPageFileProviderAccessor : IPageProviderAccessor
     {
-        public DefaultRazorPagesFileProviderAccessor(IOptions<RazorPagesOptions> options)
+        public DefaultPageFileProviderAccessor(IOptions<RazorPagesOptions> options)
         {
             FileProvider = new CompositeFileProvider(options.Value.FileProviders);
         }

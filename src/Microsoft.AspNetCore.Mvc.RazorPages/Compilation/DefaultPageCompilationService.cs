@@ -15,16 +15,16 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
 {
-    public class DefaultRazorPagesCompilationService : IRazorPagesCompilationService
+    public class DefaultPageCompilationService : IPageCompilationService
     {
-        private readonly RazorPagesRazorEngineHost _host;
+        private readonly PageRazorEngineHost _host;
         private readonly ApplicationPartManager _partManager;
 
         private readonly string _baseNamespace;
 
-        public DefaultRazorPagesCompilationService(
+        public DefaultPageCompilationService(
             ApplicationPartManager partManager,
-            RazorPagesRazorEngineHost host)
+            PageRazorEngineHost host)
         {
             _partManager = partManager;
             _host = host;

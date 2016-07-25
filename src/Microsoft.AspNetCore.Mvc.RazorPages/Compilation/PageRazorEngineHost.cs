@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
 {
-    public class RazorPagesRazorEngineHost : RazorEngineHost
+    public class PageRazorEngineHost : RazorEngineHost
     {
-        public RazorPagesRazorEngineHost()
+        public PageRazorEngineHost()
             : base(new CSharpRazorCodeLanguage())
         {
             DefaultBaseClass = typeof(Page).FullName;

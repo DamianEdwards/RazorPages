@@ -9,13 +9,13 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 {
-    public class RazorPageActionDescriptorProvider : IActionDescriptorProvider
+    public class PageActionDescriptorProvider : IActionDescriptorProvider
     {
         private readonly IFileProvider _fileProvider;
         private readonly MvcOptions _options;
 
-        public RazorPageActionDescriptorProvider(
-            IRazorPagesFileProviderAccessor fileProvider,
+        public PageActionDescriptorProvider(
+            IPageProviderAccessor fileProvider,
             IOptions<MvcOptions> options)
         {
             _fileProvider = fileProvider.FileProvider;
@@ -53,7 +53,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                 filters.Add(new FilterDescriptor(_options.Filters[i], FilterScope.Global));
             }
 
-            actions.Add(new RazorPageActionDescriptor()
+            actions.Add(new PageActionDescriptor()
             {
                 AttributeRouteInfo = new AttributeRouteInfo()
                 {

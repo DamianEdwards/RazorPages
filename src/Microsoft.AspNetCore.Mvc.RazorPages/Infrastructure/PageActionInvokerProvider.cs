@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 {
-    public class RazorPageActionInvokerProvider : IActionInvokerProvider
+    public class PageActionInvokerProvider : IActionInvokerProvider
     {
         private readonly DiagnosticListener _diagnosticSource;
         private readonly ILogger _logger;
@@ -17,7 +17,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         private readonly IPageFactory _factory;
         private readonly IValueProviderFactory[] _valueProviderFactories;
 
-        public RazorPageActionInvokerProvider(
+        public PageActionInvokerProvider(
             IPageFactory factory,
             DiagnosticListener diagnosticSource,
             ILoggerFactory loggerFactory,
@@ -28,7 +28,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
             _diagnosticSource = diagnosticSource;
 
             _filterProviders = filterProviders.OrderBy(fp => fp.Order).ToArray();
-            _logger = loggerFactory.CreateLogger<RazorPageActionInvoker>();
+            _logger = loggerFactory.CreateLogger<PageActionInvoker>();
             _valueProviderFactories = options.Value.ValueProviderFactories.ToArray();
         }
 
@@ -36,7 +36,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 
         public void OnProvidersExecuting(ActionInvokerProviderContext context)
         {
-            var actionDescriptor = context.ActionContext.ActionDescriptor as RazorPageActionDescriptor;
+            var actionDescriptor = context.ActionContext.ActionDescriptor as PageActionDescriptor;
             if (actionDescriptor != null)
             {
                 var itemCount = actionDescriptor.FilterDescriptors?.Count ?? 0;
@@ -65,7 +65,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                     filters[i] = filterProviderContext.Results[i].Filter;
                 }
 
-                context.Result = new RazorPageActionInvoker(
+                context.Result = new PageActionInvoker(
                     _diagnosticSource,
                     _logger,
                     _factory,

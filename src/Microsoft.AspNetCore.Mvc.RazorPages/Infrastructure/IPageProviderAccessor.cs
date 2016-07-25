@@ -2,7 +2,7 @@
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 {
-    public interface IRazorPagesFileProviderAccessor
+    public interface IPageProviderAccessor
     {
         IFileProvider FileProvider { get; }
     }

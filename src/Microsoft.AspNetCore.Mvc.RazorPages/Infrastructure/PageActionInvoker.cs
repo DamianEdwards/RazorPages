@@ -7,13 +7,11 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.RazorPages.Compilation;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 {
-    public class RazorPageActionInvoker : IActionInvoker
+    public class PageActionInvoker : IActionInvoker
     {
         private readonly IPageFactory _factory;
         private readonly DiagnosticListener _diagnosticSource;
@@ -27,7 +25,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
         private ResourceExecutingContext _resourceExecutingContext;
         private ResourceExecutedContext _resourceExecutedContext;
 
-        public RazorPageActionInvoker(
+        public PageActionInvoker(
             DiagnosticListener diagnosticSource,
             ILogger logger,
             IPageFactory factory,
