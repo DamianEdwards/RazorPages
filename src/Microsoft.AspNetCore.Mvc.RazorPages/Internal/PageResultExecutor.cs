@@ -23,7 +23,12 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Internal
 
         public Task ExecuteAsync(ActionContext actionContext, PageViewResult result)
         {
-            return ExecuteAsync(actionContext, result.Page, null, null, null, null);
+            if (result.Model != null)
+            {
+                result.Page.PageContext.ViewData.Model = result.Model;
+            }
+
+            return ExecuteAsync(actionContext, result.Page, result.Page.ViewData, result.Page.TempData, result.ContentType, result.StatusCode);
         } 
     }
 }

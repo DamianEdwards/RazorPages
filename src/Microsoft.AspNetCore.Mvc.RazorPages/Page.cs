@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Razor.Internal;
 using Microsoft.AspNetCore.Mvc.RazorPages.ModelBinding;
@@ -49,6 +50,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
 
         public HttpContext HttpContext => PageContext.HttpContext;
 
+        public ModelStateDictionary ModelState => PageContext.ModelState;
+
         public ViewDataDictionary ViewData => PageContext?.ViewData;
 
         protected async Task<T> BindAsync<T>(string name)
@@ -69,6 +72,11 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
         protected IActionResult View()
         {
             return new PageViewResult(this);
+        }
+
+        protected IActionResult View(object model)
+        {
+            return new PageViewResult(this, model);
         }
 
         public virtual Task ExecuteAsync()

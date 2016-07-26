@@ -11,7 +11,6 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
     {
         private const string ModelKeyword = "model";
         private const string InjectKeyword = "inject";
-        private SourceLocation? _endInheritsLocation;
         private bool _modelStatementFound;
 
         public PageCodeParser()

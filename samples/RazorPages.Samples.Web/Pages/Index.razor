@@ -1,4 +1,5 @@
 ﻿@using System
+@using System.Collections.Generic
 @using System.Reflection
 @using Microsoft.AspNetCore.Mvc
 @using Microsoft.AspNetCore.Mvc.Rendering
@@ -7,45 +8,44 @@
 @inject IHtmlHelper<Customer> Html
 
 @functions {
-    public string Message { get; set; }
+    
+    public IEnumerable<Customer> ExistingCustomers { get; set; }
 
-    public async Task OnGetAsync(string message)
+    public async Task OnGetAsync()
     {
-        Message2 = "This was a GET";
-
-        Message = message ?? "Hello, World!";
+        ExistingCustomers = GetCustomers();
     }
 
-    public async Task<IActionResult> OnPost(string message)
+    public async Task<IActionResult> OnPost(Customer customer)
     {
-        Message = "This was a POST";
-
-        Message2 = message ?? "Hello, World!";
-
-        if (Message2 == "redirect")
+        if (ModelState.IsValid)
         {
-            return Redirect("http://google.com");
+            AddCustomer(customer);
+            return Redirect("/");
         }
 
-        return View();
+        ExistingCustomers = GetCustomers();
+        return View(customer);
     }
 }
 <html>
     <head>
+        <title>All about interesting people</title>
     </head>
     <body>
-        <h1>Message from cshtml: @Message</h1>
-        <h1>Message from codebehind: @Message2</h1>
-        <h1>My class: @GetType().GetTypeInfo().FullName</h1>
-        <h1>Base class: @GetType().GetTypeInfo().BaseType.FullName</h1>
+        <div>
+        <h1>Customers</h1>
+        <ul>
+        @foreach (var customer in ExistingCustomers)
+        {
+            <li>@customer.Id - @customer.Name</li>
+        }
+        </ul>
+        </div>
         <form method="POST">
-            <input type="text" name="message" />
-            <input type="submit" value="Submit"/>
-        </form>
-        <hr />
-        @using (Html.BeginForm()) {
+            @Html.ValidationSummary()
             <span>@Html.LabelFor(m => m.Name)</span> @Html.EditorFor(m => m.Name)
             <input type="submit" value="Add Customer"/>
-        }
+        </form>
     </body>
 </html>

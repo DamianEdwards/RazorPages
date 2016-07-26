@@ -11,7 +11,15 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
             Page = page;
         }
 
+        public PageViewResult(Page page, object model)
+        {
+            Page = page;
+            Model = model;
+        }
+
         public string ContentType { get; set; }
+
+        public object Model { get; }
 
         public Page Page { get; }
 
