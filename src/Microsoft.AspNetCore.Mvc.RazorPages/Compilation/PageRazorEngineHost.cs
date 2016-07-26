@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Razor;
 using Microsoft.AspNetCore.Razor.CodeGenerators;
+using Microsoft.AspNetCore.Razor.Parser;
 using Microsoft.AspNetCore.Razor.Runtime.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
@@ -62,6 +63,16 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                 BeginContextMethodName = "BeginContext",
                 EndContextMethodName = "EndContext"
             };
+        }
+
+        public override ParserBase DecorateCodeParser(ParserBase incomingCodeParser)
+        {
+            return new PageCodeParser();
+        }
+
+        public override CodeGenerator DecorateCodeGenerator(CodeGenerator incomingBuilder, CodeGeneratorContext context)
+        {
+            return new PageCodeGenerator(context);
         }
     }
 }
