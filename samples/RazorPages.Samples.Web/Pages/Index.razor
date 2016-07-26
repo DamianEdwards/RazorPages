@@ -2,7 +2,9 @@
 @using System.Reflection
 @using Microsoft.AspNetCore.Mvc
 @using Microsoft.AspNetCore.Mvc.Rendering
-@inject global::Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure.IPageFactory PageFactory
+@using RazorPages.Samples.Web
+@model Customer
+@inject IHtmlHelper<Customer> Html
 
 @functions {
     public string Message { get; set; }
@@ -40,6 +42,10 @@
             <input type="text" name="message" />
             <input type="submit" value="Submit"/>
         </form>
-        @Html.RouteLink("Reload it!", new { page = "/Index.razor" })
+        <hr />
+        @using (Html.BeginForm()) {
+            <span>@Html.LabelFor(m => m.Name)</span> @Html.EditorFor(m => m.Name)
+            <input type="submit" value="Add Customer"/>
+        }
     </body>
 </html>

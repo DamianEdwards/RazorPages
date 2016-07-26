@@ -49,6 +49,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
 
         public HttpContext HttpContext => PageContext.HttpContext;
 
+        public ViewDataDictionary ViewData => PageContext?.ViewData;
+
         protected async Task<T> BindAsync<T>(string name)
         {
             if (_binder == null)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -432,7 +433,26 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
 
         private Task ExecutePageAsync()
         {
-            var viewData = new ViewDataDictionary<object>(_metadataProvider, _actionContext.ModelState);
+            Type viewDataType = null;
+            var viewDataProperty = _actionDescriptor.PageType.GetDeclaredProperty("ViewData");
+            if (viewDataProperty != null)
+            {
+                var viewDataPropertyType = viewDataProperty.PropertyType.GetTypeInfo();
+                if (viewDataPropertyType.IsGenericType && viewDataPropertyType.GetGenericTypeDefinition() == typeof(ViewDataDictionary<>))
+                {
+                    viewDataType = viewDataPropertyType.GetGenericArguments()[0];
+                }
+            }
+
+            ViewDataDictionary viewData;
+            if (viewDataType == null)
+            {
+                viewData = new ViewDataDictionary<object>(_metadataProvider, _actionContext.ModelState);
+            }
+            else
+            {
+                viewData = (ViewDataDictionary)Activator.CreateInstance(typeof(ViewDataDictionary<>).MakeGenericType(viewDataType), _metadataProvider, _actionContext.ModelState);
+            }
             
             var tempData = _tempDataFactory.GetTempData(_actionContext.HttpContext);
 
