@@ -405,7 +405,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             public void GenerateCode(StringBuilder builder)
             {
                 builder.AppendFormat(@"
-    if (string.Equals(HttpContext.Request.Method, ""{0}"", global::System.StringComparison.Ordinal))
+    if (string.Equals(this.Context.Request.Method, ""{0}"", global::System.StringComparison.Ordinal))
     {{",
                     Verb);
                 builder.AppendLine();

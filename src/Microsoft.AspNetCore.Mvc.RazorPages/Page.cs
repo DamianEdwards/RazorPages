@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Mvc.Razor.Internal;
 using Microsoft.AspNetCore.Mvc.RazorPages.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Mvc.ViewFeatures.Internal;
 using Microsoft.AspNetCore.Razor.Runtime.TagHelpers;
@@ -25,7 +24,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.Mvc.RazorPages
 {
-    public abstract class Page : IView
+    public abstract class Page : IRazorPage
     {
         private IPageArgumentBinder _binder;
         private readonly HashSet<string> _renderedSections = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -47,8 +46,6 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
         }
 
         public PageContext PageContext { get; set; }
-
-        public HttpContext HttpContext => PageContext.HttpContext;
 
         public ModelStateDictionary ModelState => PageContext.ModelState;
 
@@ -84,9 +81,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
             return TaskCache.CompletedTask;
         }
 
-        Task IView.RenderAsync(ViewContext viewContext)
+        Task IRazorPage.ExecuteAsync()
         {
-            ViewContext = viewContext;
             return RenderAsync();
         }
 
@@ -98,7 +94,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
         /// <summary>
         /// An <see cref="HttpContext"/> representing the current request execution.
         /// </summary>
-        public HttpContext Context => ViewContext?.HttpContext;
+        public HttpContext Context => PageContext?.HttpContext;
 
         /// <inheritdoc />
         public string Path { get; set; }

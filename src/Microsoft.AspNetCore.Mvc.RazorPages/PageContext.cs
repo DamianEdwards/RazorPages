@@ -33,12 +33,6 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
             set { base.ActionDescriptor = value; }
         }
 
-        public Page Page
-        {
-            get { return (Page)base.View; }
-            set { base.View = value; }
-        }
-
         public IList<IValueProviderFactory> ValueProviderFactories
         {
             get

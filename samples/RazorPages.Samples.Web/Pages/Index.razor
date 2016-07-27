@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Mvc
 @using Microsoft.AspNetCore.Mvc.Rendering
 @using RazorPages.Samples.Web
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @model Customer
 @inject IHtmlHelper<Customer> Html
 
@@ -28,24 +29,23 @@
         return View(customer);
     }
 }
-<html>
-    <head>
-        <title>All about interesting people</title>
-    </head>
-    <body>
-        <div>
-        <h1>Customers</h1>
-        <ul>
-        @foreach (var customer in ExistingCustomers)
-        {
-            <li>@customer.Id - @customer.Name</li>
-        }
-        </ul>
-        </div>
-        <form method="POST">
-            @Html.ValidationSummary()
-            <span>@Html.LabelFor(m => m.Name)</span> @Html.EditorFor(m => m.Name)
-            <input type="submit" value="Add Customer"/>
-        </form>
-    </body>
-</html>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "All about interesting people";
+}
+
+<div>
+    <h1>Customers</h1>
+    <ul>
+    @foreach (var customer in ExistingCustomers)
+    {
+        <li>@customer.Id - @customer.Name</li>
+    }
+    </ul>
+</div>
+<form method="POST">
+    @Html.ValidationSummary()
+    <span>@Html.LabelFor(m => m.Name)</span> @Html.EditorFor(m => m.Name)
+    <input type="submit" value="Add Customer"/>
+</form>

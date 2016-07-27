@@ -1,5 +1,8 @@
-﻿using Microsoft.AspNetCore.Razor;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Razor;
 using Microsoft.AspNetCore.Razor.CodeGenerators;
+using Microsoft.AspNetCore.Razor.Compilation.TagHelpers;
 using Microsoft.AspNetCore.Razor.Parser;
 using Microsoft.AspNetCore.Razor.Runtime.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
@@ -8,6 +11,8 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
 {
     public class PageRazorEngineHost : RazorEngineHost
     {
+        private ITagHelperDescriptorResolver _tagHelperDescriptorResolver;
+
         public PageRazorEngineHost()
             : base(new CSharpRazorCodeLanguage())
         {
@@ -63,6 +68,30 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                 BeginContextMethodName = "BeginContext",
                 EndContextMethodName = "EndContext"
             };
+        }
+
+        public override ITagHelperDescriptorResolver TagHelperDescriptorResolver
+        {
+            get
+            {
+                // The initialization of the _tagHelperDescriptorResolver needs to be lazy to allow for the setting
+                // of DesignTimeMode.
+                if (_tagHelperDescriptorResolver == null)
+                {
+                    _tagHelperDescriptorResolver = new TagHelperDescriptorResolver(DesignTimeMode);
+                }
+
+                return _tagHelperDescriptorResolver;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                _tagHelperDescriptorResolver = value;
+            }
         }
 
         public override ParserBase DecorateCodeParser(ParserBase incomingCodeParser)
