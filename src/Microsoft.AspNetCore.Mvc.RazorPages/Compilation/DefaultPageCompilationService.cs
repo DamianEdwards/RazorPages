@@ -137,11 +137,6 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
 
         private void GenerateExecuteAsyncMethod(ref CSharpCompilation compilation, HandlerMethod onGet, HandlerMethod onPost)
         {
-            if (onGet == null && onPost == null)
-            {
-                return;
-            }
-
             var builder = new StringBuilder();
             builder.AppendLine("public override async Task ExecuteAsync()");
             builder.AppendLine("{");
