@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.RazorPages.Compilation;
 using Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure;
@@ -62,6 +64,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddSingleton<IPageCompilationService, DefaultPageCompilationService>();
             services.TryAddSingleton<PageRazorEngineHost>();
+            services.Replace(ServiceDescriptor.Singleton<IRazorPageActivator, HackedRazorPageActivator>()); // Awful Hack
 
             services.TryAddSingleton<IPageArgumentBinder, DefaultPageArgumentBinder>();
 
