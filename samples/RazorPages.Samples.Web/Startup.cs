@@ -22,10 +22,14 @@ namespace RazorPages.Samples.Web
         {
             loggerFactory.AddConsole(LogLevel.Debug);
 
+            app.UseStatusCodePages();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseStaticFiles();
 
             app.UseMvc();
         }
