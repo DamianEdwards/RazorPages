@@ -52,9 +52,21 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             // tokens.
             var typeName = Span.GetContent().Value;
 
+            AcceptWhile(IsSpacingToken(includeNewLines: false, includeComments: true));
+
             Optional(CSharpSymbolType.Semicolon);
 
-            if (!At(CSharpSymbolType.NewLine))
+            AcceptWhile(IsSpacingToken(includeNewLines: false, includeComments: true));
+
+            if (At(CSharpSymbolType.NewLine))
+            {
+                AcceptAndMoveNext();
+            }
+            else if (EndOfFile)
+            {
+                // Do nothing
+            }
+            else
             {
                 Context.OnError(start, "need a newline", InjectKeyword.Length);
 
@@ -62,8 +74,6 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                 AcceptUntil(CSharpSymbolType.NewLine);
                 return;
             }
-
-            AcceptAndMoveNext();
 
             Span.ChunkGenerator = new ModelChunkGenerator(typeName);
 
@@ -114,9 +124,21 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             var propertyName = CurrentSymbol.Content;
             AcceptAndMoveNext();
 
+            AcceptWhile(IsSpacingToken(includeNewLines: false, includeComments: true));
+
             Optional(CSharpSymbolType.Semicolon);
 
-            if (!At(CSharpSymbolType.NewLine))
+            AcceptWhile(IsSpacingToken(includeNewLines: false, includeComments: true));
+
+            if (At(CSharpSymbolType.NewLine))
+            {
+                AcceptAndMoveNext();
+            }
+            else if (EndOfFile)
+            {
+                // Do nothing
+            }
+            else
             {
                 Context.OnError(start, "need a newline", InjectKeyword.Length);
 
@@ -124,8 +146,6 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                 AcceptUntil(CSharpSymbolType.NewLine);
                 return;
             }
-
-            AcceptAndMoveNext();
 
             Span.ChunkGenerator = new InjectParameterGenerator(typeName, propertyName);
 
