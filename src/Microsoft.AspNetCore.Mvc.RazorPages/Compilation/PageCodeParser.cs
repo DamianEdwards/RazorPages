@@ -36,8 +36,9 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             }
 
             AcceptWhile(IsSpacingToken(includeNewLines: false, includeComments: true));
+            Output(SpanKind.Code);
 
-            if (!At(CSharpSymbolType.Identifier))
+            if (!NamespaceOrTypeName())
             {
                 Context.OnError(start, "need a type name", ModelKeyword.Length);
 
@@ -46,8 +47,10 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                 return;
             }
 
-            var typeName = CurrentSymbol.Content;
-            NamespaceOrTypeName();
+            // We parsed the whitespace + type name in the current span, so let's extract the type name.
+            // We have to do a GetContent() here because the name is potentially made up of multiple
+            // tokens.
+            var typeName = Span.GetContent().Value;
 
             Optional(CSharpSymbolType.Semicolon);
 
@@ -83,7 +86,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             AcceptWhile(IsSpacingToken(includeNewLines: false, includeComments: true));
             Output(SpanKind.Code);
             
-            if (!At(CSharpSymbolType.Identifier))
+            if (!NamespaceOrTypeName())
             {
                 Context.OnError(start, "need a type name", InjectKeyword.Length);
 
@@ -91,8 +94,10 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                 AcceptUntil(CSharpSymbolType.NewLine);
                 return;
             }
-            
-            NamespaceOrTypeName();
+
+            // We parsed the whitespace + type name in the current span, so let's extract the type name.
+            // We have to do a GetContent() here because the name is potentially made up of multiple
+            // tokens.
             var typeName = Span.GetContent().Value;
 
             AcceptWhile(IsSpacingToken(includeNewLines: false, includeComments: true));
