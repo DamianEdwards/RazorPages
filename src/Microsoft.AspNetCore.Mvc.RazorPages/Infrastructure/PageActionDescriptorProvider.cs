@@ -64,7 +64,7 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Infrastructure
                 RelativePath = "Pages" + file.ViewEnginePath,
                 RouteValues = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "page", file.ViewEnginePath },
+                    { "page", file.ViewEnginePath.Substring(0, file.ViewEnginePath.Length - ".razor".Length) },
                 },
                 ViewEnginePath = file.ViewEnginePath,
             });
