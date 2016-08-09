@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Razor;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Emit;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.Extensions.FileProviders;
 
@@ -119,7 +120,10 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
             {
                 using (var pdb = new MemoryStream())
                 {
-                    var emitResult = compilation.Emit(peStream: pe, pdbStream: pdb);
+                    var emitResult = compilation.Emit(
+                        peStream: pe, 
+                        pdbStream: pdb, 
+                        options: new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb));
                     if (!emitResult.Success)
                     {
                         Throw(stream, relativePath, generatorResults.GeneratedCode, compilation.AssemblyName, emitResult.Diagnostics);
