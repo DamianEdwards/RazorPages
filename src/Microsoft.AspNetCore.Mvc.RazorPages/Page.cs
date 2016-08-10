@@ -118,6 +118,9 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages
         [RazorInject]
         public DiagnosticSource DiagnosticSource { get; set; }
 
+        [RazorInject]
+        public IModelExpressionProvider ModelExpressionProvider { get; set; }
+
         /// <summary>
         /// Gets the <see cref="TextWriter"/> that the page is writing output to.
         /// </summary>

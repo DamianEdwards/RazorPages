@@ -46,6 +46,6 @@
 </div>
 <form method="POST">
     @Html.ValidationSummary()
-    <span>@Html.LabelFor(m => m.Name)</span> @Html.EditorFor(m => m.Name)
+    <span>@Html.LabelFor(m => m.Name)</span> <input asp-for="Name" />
     <input type="submit" value="Add Customer"/>
 </form>
