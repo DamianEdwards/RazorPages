@@ -412,9 +412,9 @@ namespace Microsoft.AspNetCore.Mvc.RazorPages.Compilation
                 for (var i = 0; i < Symbol.Parameters.Length; i++)
                 {
                     var parameter = Symbol.Parameters[i];
-                    var parameterTypeFullName = parameter.Type.ContainingNamespace + "." + parameter.Type.Name;
+                    var parameterTypeFullName = parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
-                    builder.AppendFormat("var param{0} = await BindAsync<global::{1}>(\"{2}\");", i, parameterTypeFullName, parameter.Name);
+                    builder.AppendFormat("var param{0} = await BindAsync<{1}>(\"{2}\");", i, parameterTypeFullName, parameter.Name);
                     builder.AppendLine();
                 }
                 
